@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velarya – Interaktive Karte</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #101820;
+      color: white;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      touch-action: none;
+      background: radial-gradient(circle, #233642 0%, #101820 70%);
+    }
+
+    #viewport.dragging {
+      cursor: grabbing;
+    }
+
+    #map {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 2048px;
+      height: 1536px;
+      transform-origin: 0 0;
+      user-select: none;
+    }
+
+    #map img {
+      width: 2048px;
+      height: 1536px;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hotspot {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid rgba(40, 130, 255, 0.95);
+      box-shadow: 0 0 0 4px rgba(40, 130, 255, 0.25), 0 0 14px rgba(120, 190, 255, 0.9);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .hotspot:hover .dot {
+      transform: scale(1.25);
+      box-shadow: 0 0 0 6px rgba(40, 130, 255, 0.35), 0 0 22px rgba(160, 210, 255, 1);
+    }
+
+    .tooltip {
+      position: absolute;
+      left: 50%;
+      bottom: 38px;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.88);
+      color: white;
+      min-width: 160px;
+      padding: 10px 13px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    .tooltip strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .tooltip small {
+      display: block;
+      margin-top: 3px;
+      font-size: 13px;
+      color: #cfe6ff;
+      font-family: Arial, sans-serif;
+    }
+
+    .hotspot:hover .tooltip {
+      opacity: 1;
+    }
+
+    .help {
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 20;
+      background: rgba(0, 0, 0, 0.72);
+      color: white;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font: 14px Arial, sans-serif;
+      line-height: 1.45;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      pointer-events: none;
+    }
+
+    @media (max-width: 700px) {
+      .help {
+        display: none;
+      }
+      .tooltip strong {
+        font-size: 15px;
+      }
+      .tooltip small {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport">
+    <div id="map">
+      <img src="karte.png" alt="Karte von Velarya" draggable="false" />
+        <a class="hotspot" style="left:44.3435%; top:5.9438%;" href="https://discord.com/channels/1514984333344112811/1518861674579230800" target="_blank" rel="noopener noreferrer" aria-label="Sylvera öffnen">
+          <span class="dot"></span>
+          <span class="tooltip"><strong>🌙 Sylvera</strong><small>Hof des Mondes</small></span>
+        </a>
+        <a class="hotspot" style="left:64.3797%; top:5.6976%;" href="https://discord.com/channels/1514984333344112811/1518860134129078395" target="_blank" rel="noopener noreferrer" aria-label="Ebonvale öffnen">
+          <span class="dot"></span>
+          <span class="tooltip"><strong>🌑 Ebonvale</strong><small>Hof der Nacht</small></span>
+        </a>
+        <a class="hotspot" style="left:63.1445%; top:26.6271%;" href="https://discord.com/channels/1514984333344112811/1518888878390382632" target="_blank" rel="noopener noreferrer" aria-label="Amaranthia öffnen">
+          <span class="dot"></span>
+          <span class="tooltip"><strong>🌸 Amaranthia</strong><small>Hof der Vier Jahreszeiten</small></span>
+        </a>
+    </div>
+  </div>
+
+  <div class="help">
+    🖱️ Mausrad zum Zoomen<br>
+    🤚 Ziehen zum Bewegen<br>
+    ✨ Klick auf Punkt öffnet Discord
+  </div>
+
+  <script>
+    const viewport = document.getElementById("viewport");
+    const map = document.getElementById("map");
+
+    let scale = 0.72;
+    let x = 0;
+    let y = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    function applyTransform() {
+      map.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    }
+
+    function centerMap() {
+      const vw = viewport.clientWidth;
+      const vh = viewport.clientHeight;
+      x = (vw - 2048 * scale) / 2;
+      y = (vh - 1536 * scale) / 2;
+      applyTransform();
+    }
+
+    window.addEventListener("load", centerMap);
+    window.addEventListener("resize", centerMap);
+
+    viewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const oldScale = scale;
+      const zoom = e.deltaY < 0 ? 1.12 : 0.88;
+      scale = Math.min(Math.max(scale * zoom, 0.35), 3.5);
+
+      x = mouseX - ((mouseX - x) / oldScale) * scale;
+      y = mouseY - ((mouseY - y) / oldScale) * scale;
+
+      applyTransform();
+    }, { passive: false });
+
+    viewport.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".hotspot")) return;
+      isDragging = true;
+      viewport.classList.add("dragging");
+      startX = e.clientX - x;
+      startY = e.clientY - y;
+      viewport.setPointerCapture(e.pointerId);
+    });
+
+    viewport.addEventListener("pointermove", (e) => {
+      if (!isDragging) return;
+      x = e.clientX - startX;
+      y = e.clientY - startY;
+      applyTransform();
+    });
+
+    viewport.addEventListener("pointerup", (e) => {
+      isDragging = false;
+      viewport.classList.remove("dragging");
+    });
+
+    viewport.addEventListener("pointercancel", () => {
+      isDragging = false;
+      viewport.classList.remove("dragging");
+    });
+
+    applyTransform();
+  </script>
+</body>
+</html>
