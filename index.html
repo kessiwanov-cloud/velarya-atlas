@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Velarya Atlas</title>
+  <title>Velarya Atlas Editor</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,24 +15,39 @@
   </div>
 
   <div id="toolbar">
-    <button id="editorToggle">⚙️ Bearbeitungsmodus</button>
-    <button id="exportData">📋 data.js kopieren</button>
+    <button id="editorToggle">⚙️ Bearbeiten</button>
+    <button id="addMode">➕ Neuer Punkt</button>
+    <button id="saveLocal">💾 Speichern</button>
+    <button id="exportData">📋 Export data.js</button>
+    <button id="resetLocal">↩️ Zurücksetzen</button>
   </div>
 
-  <div id="editorPanel" hidden>
-    <h3>Neuen Ort setzen</h3>
-    <p>Klicke im Bearbeitungsmodus auf die Karte.</p>
+  <div id="panel">
+    <h3 id="panelTitle">Ort bearbeiten</h3>
+    <p id="hint">Punkt auswählen oder „Neuer Punkt“ aktivieren und auf die Karte klicken.</p>
+
     <label>Stadtname</label>
     <input id="cityName" placeholder="z. B. Ebonvale">
-    <label>Bereich</label>
+
+    <label>Bereich / Reich</label>
     <input id="cityArea" placeholder="z. B. Hof der Nacht">
+
     <label>Icon</label>
     <input id="cityIcon" placeholder="🌑">
+
     <label>Discord-Link</label>
     <input id="cityDiscord" placeholder="https://discord.com/channels/...">
-    <button id="saveCity">Ort hinzufügen</button>
-    <button id="cancelCity">Abbrechen</button>
-    <small>Danach „data.js kopieren“ drücken und die Datei auf GitHub ersetzen.</small>
+
+    <div class="row">
+      <button id="applyEdit">Änderung speichern</button>
+      <button id="deleteCity">Löschen</button>
+    </div>
+
+    <small>
+      Tipp: Im Bearbeiten-Modus kannst du Marker mit der Maus verschieben.
+      Danach „Speichern“ drücken, damit es im Browser bleibt.
+      Für GitHub danach „Export data.js“ nutzen.
+    </small>
   </div>
 
   <script src="data.js"></script>
