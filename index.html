@@ -10,17 +10,29 @@
   <div id="viewport">
     <div id="map">
       <img id="mapImage" src="karte.png" alt="Karte von Velarya" draggable="false">
-      <svg id="routes"></svg>
       <div id="markers"></div>
     </div>
   </div>
 
-  <div id="ui">
-    <input id="search" type="search" placeholder="Stadt suchen...">
-    <select id="fromCity"><option value="">Von...</option></select>
-    <select id="toCity"><option value="">Nach...</option></select>
-    <button id="showRoutes">Route zeigen</button>
-    <button id="clearRoutes">Löschen</button>
+  <div id="toolbar">
+    <button id="editorToggle">⚙️ Bearbeitungsmodus</button>
+    <button id="exportData">📋 data.js kopieren</button>
+  </div>
+
+  <div id="editorPanel" hidden>
+    <h3>Neuen Ort setzen</h3>
+    <p>Klicke im Bearbeitungsmodus auf die Karte.</p>
+    <label>Stadtname</label>
+    <input id="cityName" placeholder="z. B. Ebonvale">
+    <label>Bereich</label>
+    <input id="cityArea" placeholder="z. B. Hof der Nacht">
+    <label>Icon</label>
+    <input id="cityIcon" placeholder="🌑">
+    <label>Discord-Link</label>
+    <input id="cityDiscord" placeholder="https://discord.com/channels/...">
+    <button id="saveCity">Ort hinzufügen</button>
+    <button id="cancelCity">Abbrechen</button>
+    <small>Danach „data.js kopieren“ drücken und die Datei auf GitHub ersetzen.</small>
   </div>
 
   <script src="data.js"></script>
